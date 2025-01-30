@@ -1,3 +1,4 @@
+import 'package:app_upload/update.dart';
 import 'package:flutter/material.dart';
 import 'package:app_upload/upload.dart';
 import 'package:http/http.dart' as http;
@@ -45,9 +46,15 @@ class _FileListPageState extends State<FileListPage> {
     _fileListFuture = fetchFiles();
   }
 
+  Future<void> _refreshFileList() async {
+    setState(() {
+      _fileListFuture = fetchFiles();
+    });
+  }
+
   Future<List<FileItem>> fetchFiles() async {
     const String apiUrl =
-        "http://192.168.0.104/api_gambar/index.php"; // Ganti dengan URL API Anda
+        "http://192.168.0.105/api_gambar/index.php"; // Ganti dengan URL API Anda
     try {
       final response = await http.get(Uri.parse(apiUrl));
       if (response.statusCode == 200) {
@@ -69,7 +76,7 @@ class _FileListPageState extends State<FileListPage> {
 
   Future<void> downloadFile(String fileId, String name) async {
     const String baseUrl =
-        "http://192.168.0.104/api_gambar/download.php"; // Ganti dengan URL API download Anda
+        "http://192.168.0.105/api_gambar/download.php"; // Ganti dengan URL API download Anda
     String message = ''; // Pesan untuk ditampilkan pada SnackBar
 
     try {
@@ -111,17 +118,19 @@ class _FileListPageState extends State<FileListPage> {
 
     // Display the message using SnackBar
     if (message.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            message,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          backgroundColor: const Color(0xFFe91e63),
         ),
-        backgroundColor: const Color(0xFFe91e63),
-      ));
+      );
     }
   }
 
@@ -149,11 +158,83 @@ class _FileListPageState extends State<FileListPage> {
     return uniqueName;
   }
 
+  Future<void> deleteFile(String fileId) async {
+    const String baseUrl =
+        "http://192.168.0.105/api_gambar/delete.php"; // Sesuaikan dengan API Anda
+    String message = '';
+
+    bool confirmDelete = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Konfirmasi"),
+          content:
+              const Text("Apakah Anda yakin ingin menghapus dokumentasi ini?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text("Batal"),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text("Hapus"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmDelete) {
+      try {
+        final response = await http.delete(Uri.parse("$baseUrl?id=$fileId"));
+
+        if (response.statusCode == 200) {
+          final jsonResponse = json.decode(response.body);
+          if (jsonResponse['success'] == true) {
+            message = "File berhasil dihapus";
+
+            // Perbarui daftar file setelah penghapusan
+            setState(() {
+              _fileListFuture = fetchFiles();
+            });
+          } else {
+            message = jsonResponse['message'] ?? "Gagal menghapus file";
+          }
+        } else {
+          message = "Gagal menghapus file. Status: ${response.statusCode}";
+        }
+      } catch (e) {
+        message = "Terjadi kesalahan: $e";
+      }
+
+      // Tampilkan pesan dengan SnackBar
+      if (message.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red,
+        ));
+      }
+    }
+  }
+
+  void updateFile(String fileId, String name) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FileUpdatePage(fileId: fileId, name: name),
+      ),
+    ).then((value) {
+      if (value == true) {
+        _refreshFileList();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Uploaded Files'),
+        title: const Text('Dokumentation File'),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -167,32 +248,49 @@ class _FileListPageState extends State<FileListPage> {
           ),
         ],
       ),
-      body: FutureBuilder<List<FileItem>>(
-        future: _fileListFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-            return ListView.builder(
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                final file = snapshot.data![index];
-                return ListTile(
-                  title: Text(file.fileName),
-                  subtitle: Text(file.filePath),
-                  leading: const Icon(Icons.insert_drive_file),
-                  onTap: () {
-                    downloadFile(file.id, file.fileName);
-                  },
-                );
-              },
-            );
-          } else {
-            return const Center(child: Text('No files uploaded.'));
-          }
-        },
+      body: RefreshIndicator(
+        onRefresh: _refreshFileList,
+        child: FutureBuilder<List<FileItem>>(
+          future: _fileListFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return const Center(child: Text('Tidak ada data.'));
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(child: Text('Tidak ada data.'));
+            } else {
+              return ListView.builder(
+                itemCount: snapshot.data!.length,
+                itemBuilder: (context, index) {
+                  final file = snapshot.data![index];
+                  return ListTile(
+                    title: Text(file.name),
+                    subtitle: Text(file.fileName),
+                    leading: const Icon(Icons.insert_drive_file),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          // onPressed: () => {},
+                          onPressed: () => updateFile(file.id, file.name),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => deleteFile(file.id),
+                        ),
+                      ],
+                    ),
+                    onTap: () {
+                      downloadFile(file.id, file.fileName);
+                    },
+                  );
+                },
+              );
+            }
+          },
+        ),
       ),
     );
   }
@@ -200,11 +298,13 @@ class _FileListPageState extends State<FileListPage> {
 
 class FileItem {
   final String id;
+  final String name;
   final String fileName;
   final String filePath;
 
   FileItem({
     required this.id,
+    required this.name,
     required this.fileName,
     required this.filePath,
   });
@@ -212,6 +312,7 @@ class FileItem {
   factory FileItem.fromJson(Map<String, dynamic> json) {
     return FileItem(
       id: json['id'],
+      name: json['name'],
       fileName: json['file_name'],
       filePath: json['file_path'],
     );

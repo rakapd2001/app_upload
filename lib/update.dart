@@ -3,14 +3,17 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
-class FileUploadPage extends StatefulWidget {
-  const FileUploadPage({super.key});
+class FileUpdatePage extends StatefulWidget {
+  final String fileId;
+  final String name;
+
+  FileUpdatePage({required this.fileId, required this.name});
 
   @override
-  State<FileUploadPage> createState() => _FileUploadPageState();
+  State<FileUpdatePage> createState() => _FileUpdatePageState();
 }
 
-class _FileUploadPageState extends State<FileUploadPage> {
+class _FileUpdatePageState extends State<FileUpdatePage> {
   File? _selectedFile;
   final picker = ImagePicker();
   final TextEditingController _nameController = TextEditingController();
@@ -29,7 +32,7 @@ class _FileUploadPageState extends State<FileUploadPage> {
     }
   }
 
-  Future<void> _uploadFile() async {
+  Future<void> _UpdateFile() async {
     if (_selectedFile == null || _nameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -39,10 +42,10 @@ class _FileUploadPageState extends State<FileUploadPage> {
     }
 
     const String apiUrl =
-        "http://192.168.0.105/api_gambar/upload.php"; // Ganti dengan URL API PHP Anda
+        "http://192.168.0.105/api_gambar/Update.php"; // Ganti dengan URL API PHP Anda
     final request = http.MultipartRequest("POST", Uri.parse(apiUrl));
-
-    request.fields['name'] = _nameController.text; // Menambahkan input name
+    request.fields['id'] = widget.fileId;
+    request.fields['new_name'] = _nameController.text; // Menambahkan input name
     request.files.add(
       await http.MultipartFile.fromPath(
         'image', // Sesuaikan dengan parameter API Anda
@@ -56,7 +59,7 @@ class _FileUploadPageState extends State<FileUploadPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              'File uploaded successfully!',
+              'File Updateed successfully!',
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.white,
@@ -73,7 +76,7 @@ class _FileUploadPageState extends State<FileUploadPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Failed to upload file. Error: ${response.statusCode}',
+              'Failed to Update file. Error: ${response.statusCode}',
               style: const TextStyle(
                 fontSize: 12,
                 color: Colors.white,
@@ -88,7 +91,7 @@ class _FileUploadPageState extends State<FileUploadPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Failed to upload file. Error: ${e}',
+            'Failed to Update file. Error: ${e}',
             style: const TextStyle(
               fontSize: 12,
               color: Colors.white,
@@ -105,7 +108,7 @@ class _FileUploadPageState extends State<FileUploadPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Upload Documentation'),
+        title: const Text('Update Documentation'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -132,8 +135,8 @@ class _FileUploadPageState extends State<FileUploadPage> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _uploadFile,
-              child: const Text('Upload File'),
+              onPressed: _UpdateFile,
+              child: const Text('Update File'),
             ),
           ],
         ),
