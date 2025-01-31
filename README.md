@@ -1,16 +1,25 @@
-# app_upload
+# Kelompok 2 - Pemrograman Mobile 2
 
-A new Flutter project.
+## Anggota Kelompok:
+- **Rama Triehadi**
+- **Raka PD**
+- **Adi Mulyadi**
 
-## Getting Started
+## Mata Kuliah:
+**Pemrograman Mobile 2**
 
-This project is a starting point for a Flutter application.
+## Deskripsi Aplikasi:
+Aplikasi ini adalah proyek tugas akhir mata kuliah Pemrograman Mobile 2 yang bertujuan untuk memberikan solusi digital dalam **manajemen dokumentasi dan file upload** menggunakan platform Flutter. Pengguna dapat memilih file dari galeri dan mengunggahnya ke server PHP yang telah disiapkan, disertai dengan nama yang dapat diinputkan melalui form. Aplikasi ini juga memberikan umpan balik status yang interaktif, seperti pemberitahuan bahwa file sedang diunggah atau jika pengunggahan gagal.
 
-A few resources to get you started if this is your first Flutter project:
+## Fitur Utama:
+- Pilih file dari galeri menggunakan Image Picker.
+- Masukkan nama file menggunakan form input.
+- Upload file ke server menggunakan HTTP request.
+- Menampilkan status pengunggahan secara real-time dengan menggunakan stream.
+- Menampilkan pesan status untuk kesuksesan atau kegagalan pengunggahan.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Plugin yang Digunakan:
+- **`image_picker`**: Digunakan untuk memilih gambar dari galeri pengguna.
+- **`http`**: Digunakan untuk mengirim HTTP request untuk mengunggah file ke server.
+- **`rxdart`**: Digunakan untuk mengelola stream dan mengupdate status secara reaktif saat pengguna mengetikkan nama file dan mengunggahnya.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
