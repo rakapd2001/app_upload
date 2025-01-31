@@ -40,6 +40,8 @@ dependencies:
   path_provider: ^2.0.13
   image_downloader_v2: ^0.33.2
   flutter_file_dialog: ^3.0.2
+  share_plus: ^10.1.4
+  rxdart: ^0.28.0
 
 dev_dependencies:
   flutter_test:
