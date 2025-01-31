@@ -22,4 +22,5 @@ Aplikasi ini adalah proyek tugas akhir mata kuliah Pemrograman Mobile 2 yang ber
 - **`image_picker`**: Digunakan untuk memilih gambar dari galeri pengguna.
 - **`http`**: Digunakan untuk mengirim HTTP request untuk mengunggah file ke server.
 - **`rxdart`**: Digunakan untuk mengelola stream dan mengupdate status secara reaktif saat pengguna mengetikkan nama file dan mengunggahnya.
-
+- **`share_plus`**: Digunakan untuk membagikan konten ke social media
+- **`swipe refresh`**: Digunakan untuk
