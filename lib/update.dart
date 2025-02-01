@@ -42,7 +42,7 @@ class _FileUpdatePageState extends State<FileUpdatePage> {
     }
 
     const String apiUrl =
-        "http://192.168.0.105/api_gambar/Update.php"; // Ganti dengan URL API PHP Anda
+        "http://192.168.199.96/api_gambar/Update.php"; // Ganti dengan URL API PHP Anda
     final request = http.MultipartRequest("POST", Uri.parse(apiUrl));
     request.fields['id'] = widget.fileId;
     request.fields['new_name'] = _nameController.text; // Menambahkan input name
